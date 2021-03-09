@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DependencyResolution
 {
@@ -11,8 +13,13 @@ namespace DependencyResolution
         /// </summary>
         /// <param name="node">A node to resolve</param>
         /// <returns>Order in which nodes or their items should be resolved</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="node"/> is null</exception>
+        /// <exception cref="CircularReferenceException">Circular reference detected</exception>
         public IEnumerable<ItemNode<TItem>> GetResolved(ItemNode<TItem> node)
         {
+            if (node == null)
+                throw new ArgumentNullException(nameof(node));
+
             return GetResolved(new[] { node });
         }
 
@@ -23,9 +30,18 @@ namespace DependencyResolution
         /// </summary>
         /// <param name="nodes">The nodes to resolve</param>
         /// <returns>Order in which nodes or their items should be resolved</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="nodes"/> is null</exception>
+        /// <exception cref="CircularReferenceException">Circular reference detected</exception>
         public virtual IEnumerable<ItemNode<TItem>> GetResolved(IEnumerable<ItemNode<TItem>> nodes)
         {
+            if (nodes == null)
+                throw new ArgumentNullException(nameof(nodes));
+
             var resolved = GetResolvedList();
+
+            if (!nodes.Any())
+                return resolved;
+
             var unresolved = new List<ItemNode<TItem>>();
 
             foreach (var node in nodes)

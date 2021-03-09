@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DependencyResolution
 {
@@ -11,17 +12,23 @@ namespace DependencyResolution
 
         public ItemNode(TItem item)
         {
-            Item = item;
+            Item = item ?? throw new ArgumentNullException(nameof(item));
             Dependencies = new List<ItemNode<TItem>>();
         }
 
         public ItemNode(TItem item, params ItemNode<TItem>[] dependencies) : this(item)
         {
+            if (dependencies.Any(x => x == null))
+                throw new ArgumentNullException(nameof(dependencies) + " contains null");
+
             Dependencies.AddRange(dependencies);
         }
 
         public void IsDependentOn(ItemNode<TItem> dependency)
         {
+            if (dependency == null)
+                throw new ArgumentNullException(nameof(dependency));
+
             if (Dependencies.Contains(dependency))
                 return;
 

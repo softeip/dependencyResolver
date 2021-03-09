@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace DependencyResolution
 {
-    public class MemorableDependencyResolver<TItem> : DependencyResolver<TItem>
+    public sealed class MemorableDependencyResolver<TItem> : DependencyResolver<TItem>
     {
         private readonly List<ItemNode<TItem>> _resolved;
 
