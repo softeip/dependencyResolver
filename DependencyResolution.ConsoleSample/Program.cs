@@ -9,17 +9,13 @@ namespace DependencyResolution.ConsoleSample
         {
             HelloWorld();
 
-            Console.WriteLine();
-
             CircularReference();
-
-            Console.WriteLine();
 
             MultipleDependencies();
 
-            Console.WriteLine();
-
             MultipleItemsResolution();
+
+            PreResolvedResolution();
         }
 
         static void HelloWorld()
@@ -50,7 +46,7 @@ namespace DependencyResolution.ConsoleSample
             l.IsDependentOn(e);
             e.IsDependentOn(h);
 
-            var resolver = new DependencyResolver();
+            var resolver = new DependencyResolver<string>();
             var resolvedOrder = resolver.GetResolved(d);
 
             PrintStringNodes(resolvedOrder);
@@ -70,7 +66,7 @@ namespace DependencyResolution.ConsoleSample
             c.IsDependentOn(d); // here it comes
             d.IsDependentOn(b); // here it comes
 
-            var resolver = new DependencyResolver();
+            var resolver = new DependencyResolver<string>();
 
             try
             {
@@ -106,13 +102,15 @@ namespace DependencyResolution.ConsoleSample
 
             os.IsDependentOn(hardware);
 
-            var resolver = new DependencyResolver();
+            var resolver = new DependencyResolver<string>();
             var resolvedOrder = resolver.GetResolved(aspnet);
             PrintStringNodes(resolvedOrder);
         }
 
         static void MultipleItemsResolution()
         {
+            Console.WriteLine("Multiple Items Resolution Example:");
+
             var aspnet = new ItemNode<string>("ASP.NET");
             var networking = new ItemNode<string>("Networking");
             var dotnet = new ItemNode<string>(".NET");
@@ -142,9 +140,45 @@ namespace DependencyResolution.ConsoleSample
             loader.IsDependentOn(dotnet);
             textLoader.IsDependentOn(loader);
 
-            var resolver = new DependencyResolver();
+            var resolver = new DependencyResolver<string>();
             var resolvedOrder = resolver.GetResolved(new[] {
                 imageLoader, textLoader, aspnet
+            });
+            PrintStringNodes(resolvedOrder);
+        }
+
+        static void PreResolvedResolution()
+        {
+            Console.WriteLine("Pre-resolved Resolution Example:");
+
+            var networking = new ItemNode<string>("Networking");
+            var dotnet = new ItemNode<string>(".NET");
+            var clr = new ItemNode<string>("CLR");
+            var os = new ItemNode<string>("OS");
+            var hardware = new ItemNode<string>("Hardware");
+
+            var imageLoader = new ItemNode<string>("ImageLoader");
+            var loader = new ItemNode<string>("Loader");
+            var textLoader = new ItemNode<string>("TextLoader");
+
+            networking.IsDependentOn(os);
+            networking.IsDependentOn(hardware);
+
+            dotnet.IsDependentOn(clr);
+            dotnet.IsDependentOn(os);
+
+            clr.IsDependentOn(os);
+            os.IsDependentOn(hardware);
+
+            imageLoader.IsDependentOn(loader);
+            loader.IsDependentOn(dotnet);
+            textLoader.IsDependentOn(loader);
+
+            var resolver = new MemorableDependencyResolver<string>();
+            resolver.MarkAsResolved(dotnet);
+
+            var resolvedOrder = resolver.GetResolved(new[] {
+                imageLoader, textLoader
             });
             PrintStringNodes(resolvedOrder);
         }
@@ -155,6 +189,8 @@ namespace DependencyResolution.ConsoleSample
             {
                 Console.WriteLine(node.Item);
             }
+
+            Console.WriteLine();
         }
     }
 }

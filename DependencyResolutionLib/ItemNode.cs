@@ -5,11 +5,9 @@ namespace DependencyResolution
 {
     public class ItemNode<TItem>
     {
-        internal List<ItemNode<TItem>> Dependencies { get; }
+        protected internal virtual List<ItemNode<TItem>> Dependencies { get; }
 
         public TItem Item { get; }
-
-        public ItemNode<TItem>[] DependentNodes => Dependencies.ToArray();
 
         public ItemNode(TItem item)
         {

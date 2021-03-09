@@ -1,17 +1,31 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DependencyResolution
 {
-    public class DependencyResolver
+    public class DependencyResolver<TItem>
     {
-        public DependencyResolver()
+        /// <summary>
+        /// Uses Dependency resolution algorithm
+        /// Goes through node's dependencies recursively and builds an order
+        /// in which nodes or their items should be resolved
+        /// </summary>
+        /// <param name="node">A node to resolve</param>
+        /// <returns>Order in which nodes or their items should be resolved</returns>
+        public IEnumerable<ItemNode<TItem>> GetResolved(ItemNode<TItem> node)
         {
+            return GetResolved(new[] { node });
         }
 
-        public IEnumerable<ItemNode<TItem>> GetResolved<TItem>(IEnumerable<ItemNode<TItem>> nodes)
+        /// <summary>
+        /// Uses Dependency resolution algorithm
+        /// Goes through each node's dependencies recursively and builds an order
+        /// in which nodes or their items should be resolved
+        /// </summary>
+        /// <param name="nodes">The nodes to resolve</param>
+        /// <returns>Order in which nodes or their items should be resolved</returns>
+        public virtual IEnumerable<ItemNode<TItem>> GetResolved(IEnumerable<ItemNode<TItem>> nodes)
         {
-            var resolved = new List<ItemNode<TItem>>();
+            var resolved = GetResolvedList();
             var unresolved = new List<ItemNode<TItem>>();
 
             foreach (var node in nodes)
@@ -22,17 +36,16 @@ namespace DependencyResolution
             return resolved;
         }
 
-        public IEnumerable<ItemNode<TItem>> GetResolved<TItem>(ItemNode<TItem> node)
+        /// <summary>
+        /// Prepare a list which will be used by algorithm to add resolved nodes
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IList<ItemNode<TItem>> GetResolvedList()
         {
-            var resolved = new List<ItemNode<TItem>>();
-            var unresolved = new List<ItemNode<TItem>>();
-
-            Resolve(node, resolved, unresolved);
-
-            return resolved;
+            return new List<ItemNode<TItem>>();
         }
 
-        private void Resolve<TItem>(ItemNode<TItem> node, IList<ItemNode<TItem>> resolved, IList<ItemNode<TItem>> unresolved)
+        protected void Resolve(ItemNode<TItem> node, IList<ItemNode<TItem>> resolved, IList<ItemNode<TItem>> unresolved)
         {
             if (resolved.Contains(node))
                 return;
